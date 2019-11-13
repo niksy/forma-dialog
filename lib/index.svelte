@@ -28,24 +28,32 @@ function createHtmlClass(namespaces, suffix) {
 		.join(' ');
 }
 
+let dialogStack = [];
+let count = 0;
+
 export default {
 	oncreate() {
-		const { isContentNode, content, onCreate } = this.get();
+		const { isContentNode, content, onCreate, id } = this.get();
 		onCreate();
 		if (isContentNode) {
 			this.refs.dialog.appendChild(content);
 		}
 		focusLock.on(this.refs.dialog);
+		dialogStack.push(id);
 	},
 	ondestroy() {
-		const { onDestroy } = this.get();
+		const { onDestroy, id } = this.get();
 		onDestroy();
 		focusLock.off(this.refs.dialog);
+		dialogStack = dialogStack.filter((dialogStackId) => dialogStackId !== id);
 	},
 	data() {
+		const id = count;
+		count = count + 1;
 		return {
 			internalHtmlClassNamespace: 'z-Dialog',
-			isComponentActive: true
+			isComponentActive: true,
+			id: id
 		};
 	},
 	computed: {
@@ -85,15 +93,24 @@ export default {
 		handleGlobalMouseEvent(event) {
 			const keycode = event.which;
 			const target = event.target;
-			if (isMouseClick(keycode) && this.refs.container.contains(target)) {
-				return;
+			if (
+				isMouseClick(keycode) &&
+				target !== this.refs.dialog &&
+				!this.refs.dialog.contains(target) &&
+				(target === this.refs.backdrop ||
+					this.refs.backdrop.contains(target))
+			) {
+				this.destroy();
 			}
-			this.destroy();
 		},
 		handleGlobalKeyboardEvent(event) {
 			const keycode = event.which;
 			if (keycode === KEY_ESCAPE) {
-				this.destroy();
+				const { id } = this.get();
+				const lastDialogStackId = dialogStack[dialogStack.length - 1];
+				if (lastDialogStackId === id) {
+					this.destroy();
+				}
 			}
 		}
 	}
@@ -119,7 +136,7 @@ export default {
 <div class="{classNames.container}" ref:container>
 	<div data-z-dialog-focus-guard="true" tabindex="0"></div>
 	<div data-z-dialog-focus-guard="true" tabindex="1"></div>
-	<div class="{classNames.backdrop}">
+	<div class="{classNames.backdrop}" ref:backdrop>
 		<div
 			class="{classNames.content}"
 			role="dialog"

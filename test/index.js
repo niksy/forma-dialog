@@ -12,7 +12,7 @@ after(function() {
 	window.fixture.cleanup();
 });
 
-it('should create instance with string as content', async function() {
+it('should create instance with string as content', function() {
 	const instance = fn({
 		content: /* HTML */ '<div class="becky">becky</div>'
 	});
@@ -23,7 +23,7 @@ it('should create instance with string as content', async function() {
 	instance.destroy();
 });
 
-it('should create instance with DOM node as content', async function() {
+it('should create instance with DOM node as content', function() {
 	const node = html`
 		<div class="archie">archie</div>
 	`;
@@ -37,13 +37,13 @@ it('should create instance with DOM node as content', async function() {
 	instance.destroy();
 });
 
-it('should throw error if content doesn’t exist', async function() {
+it('should throw error if content doesn’t exist', function() {
 	assert.throws(() => {
 		fn();
 	}, /TypeError: Content is not defined./);
 });
 
-it('should destroy instance when pressing Escape key', async function() {
+it('should destroy instance when pressing Escape key', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
@@ -51,16 +51,18 @@ it('should destroy instance when pressing Escape key', async function() {
 	});
 	instance.show();
 
-	assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+	try {
+		assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
 
-	pressEscape(document.body);
+		pressEscape(document.body);
 
-	assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
-
-	instance.destroy();
+		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+	} finally {
+		instance.destroy();
+	}
 });
 
-it('should destroy instance when clicking outside dialog', async function() {
+it('should destroy instance when clicking outside dialog', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
@@ -69,19 +71,22 @@ it('should destroy instance when clicking outside dialog', async function() {
 	instance.show();
 
 	const element = document.querySelector('.z-Dialog');
+	const outsideElement = document.querySelector('.z-Dialog-backdrop');
 
-	mouseClick(element);
+	try {
+		mouseClick(element);
 
-	assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
 
-	mouseClick(document.body);
+		mouseClick(outsideElement);
 
-	assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
-
-	instance.destroy();
+		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+	} finally {
+		instance.destroy();
+	}
 });
 
-it('should destroy instance when clicking on [data-z-dialog-action="close"]', async function() {
+it('should destroy instance when clicking on [data-z-dialog-action="close"]', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">
@@ -102,18 +107,20 @@ it('should destroy instance when clicking on [data-z-dialog-action="close"]', as
 	const genericButton = document.querySelector('.molly');
 	const closeButton = document.querySelector('.honey');
 
-	mouseClick(genericButton);
+	try {
+		mouseClick(genericButton);
 
-	assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
 
-	mouseClick(closeButton);
+		mouseClick(closeButton);
 
-	assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
-
-	instance.destroy();
+		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+	} finally {
+		instance.destroy();
+	}
 });
 
-it('should call lifecycle methods', async function() {
+it('should call lifecycle methods', function() {
 	const createSpy = sinon.spy();
 	const destroySpy = sinon.spy();
 
@@ -133,7 +140,7 @@ it('should call lifecycle methods', async function() {
 	assert.ok(destroySpy.called);
 });
 
-it('should use addition HTML class namespace', async function() {
+it('should use addition HTML class namespace', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
