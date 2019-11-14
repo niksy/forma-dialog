@@ -11,7 +11,7 @@ Features:
 -   Tab and focus lock on tabbable elements inside dialog
 -   Flexible styling
 
-**[Try it now!](https://codesandbox.io/s/basic-example-mppkz)**
+**[Try it now!](https://codesandbox.io/s/basic-example-k7zml)**
 
 ## Install
 
