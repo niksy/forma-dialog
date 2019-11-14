@@ -70,6 +70,20 @@ Callback to run when dialog instance is destroyed.
 Useful when you want to perform operations such as moving dialog content to
 original location if dialog content was already existing DOM node.
 
+##### onShow
+
+Type: `Function`  
+Default: `() => {}`
+
+Callback to run when dialog instance is shown.
+
+##### onClose
+
+Type: `Function`  
+Default: `() => {}`
+
+Callback to run when dialog instance is closed.
+
 ##### htmlClassNamespace
 
 Type: `string`  
@@ -82,6 +96,10 @@ Useful if you want to create additional styling/functionality selector hook.
 ### instance.show()
 
 Show dialog.
+
+### instance.close()
+
+Close dialog.
 
 ### instance.destroy()
 

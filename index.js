@@ -6,35 +6,35 @@ export default (options = {}) => {
 		htmlClassNamespace = '',
 		onCreate = () => {},
 		onDestroy = () => {},
+		onShow = () => {},
+		onClose = () => {}
 	} = options;
-
-	let instance;
 
 	if (content instanceof TypeError) {
 		throw content;
 	}
 
+	const instance = new Component({
+		target: document.body,
+		data: {
+			content,
+			htmlClassNamespace,
+			onCreate,
+			onDestroy
+		}
+	});
+
 	return {
 		show: () => {
-			instance = new Component({
-				target: document.body,
-				data: {
-					content,
-					htmlClassNamespace,
-					onCreate,
-					onDestroy
-				}
-			});
+			instance.show();
+			onShow();
+		},
+		close: () => {
+			instance.close();
+			onClose();
 		},
 		destroy: () => {
-			if (typeof instance === 'undefined') {
-				return;
-			}
-			const { isComponentActive } = instance.get();
-			if (isComponentActive === true) {
-				instance.set({ isComponentActive: false });
-				instance.destroy();
-			}
+			instance.destroy();
 		}
 	};
 };

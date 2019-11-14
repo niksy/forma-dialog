@@ -45,14 +45,16 @@ export default {
 		const { onDestroy, id } = this.get();
 		onDestroy();
 		focusLock.off(this.refs.dialog);
-		dialogStack = dialogStack.filter((dialogStackId) => dialogStackId !== id);
+		dialogStack = dialogStack.filter(
+			(dialogStackId) => dialogStackId !== id
+		);
 	},
 	data() {
 		const id = count;
 		count = count + 1;
 		return {
 			internalHtmlClassNamespace: 'z-Dialog',
-			isComponentActive: true,
+			isHidden: true,
 			id: id
 		};
 	},
@@ -100,7 +102,7 @@ export default {
 				(target === this.refs.backdrop ||
 					this.refs.backdrop.contains(target))
 			) {
-				this.destroy();
+				this.close();
 			}
 		},
 		handleGlobalKeyboardEvent(event) {
@@ -109,9 +111,15 @@ export default {
 				const { id } = this.get();
 				const lastDialogStackId = dialogStack[dialogStack.length - 1];
 				if (lastDialogStackId === id) {
-					this.destroy();
+					this.close();
 				}
 			}
+		},
+		show() {
+			this.set({ isHidden: false });
+		},
+		close() {
+			this.set({ isHidden: true });
 		}
 	}
 };
@@ -133,7 +141,7 @@ export default {
 	on:click="handleGlobalMouseEvent(event)"
 	on:keydown="handleGlobalKeyboardEvent(event)"
 />
-<div class="{classNames.container}" ref:container>
+<div class="{classNames.container}" ref:container class:is-hidden="isHidden">
 	<div data-z-dialog-focus-guard="true" tabindex="0"></div>
 	<div data-z-dialog-focus-guard="true" tabindex="1"></div>
 	<div class="{classNames.backdrop}" ref:backdrop>
@@ -142,7 +150,7 @@ export default {
 			role="dialog"
 			aria-modal="true"
 			ref:dialog
-			on:clickactionclose="destroy()"
+			on:clickactionclose="close()"
 			tabindex="-1"
 		>
 			{#if !isContentNode} {@html content} {/if}

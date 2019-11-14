@@ -43,7 +43,7 @@ it('should throw error if content doesn’t exist', function() {
 	}, /TypeError: Content is not defined./);
 });
 
-it('should destroy instance when pressing Escape key', function() {
+it('should close instance when pressing Escape key', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
@@ -56,13 +56,13 @@ it('should destroy instance when pressing Escape key', function() {
 
 		pressEscape(document.body);
 
-		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
 	} finally {
 		instance.destroy();
 	}
 });
 
-it('should destroy instance when clicking outside dialog', function() {
+it('should close instance when clicking outside dialog', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
@@ -80,13 +80,13 @@ it('should destroy instance when clicking outside dialog', function() {
 
 		mouseClick(outsideElement);
 
-		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
 	} finally {
 		instance.destroy();
 	}
 });
 
-it('should destroy instance when clicking on [data-z-dialog-action="close"]', function() {
+it('should close instance when clicking on [data-z-dialog-action="close"]', function() {
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">
@@ -114,7 +114,7 @@ it('should destroy instance when clicking on [data-z-dialog-action="close"]', fu
 
 		mouseClick(closeButton);
 
-		assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
 	} finally {
 		instance.destroy();
 	}
@@ -123,21 +123,28 @@ it('should destroy instance when clicking on [data-z-dialog-action="close"]', fu
 it('should call lifecycle methods', function() {
 	const createSpy = sinon.spy();
 	const destroySpy = sinon.spy();
+	const showSpy = sinon.spy();
+	const closeSpy = sinon.spy();
 
 	const instance = fn({
 		content: /* HTML */ `
 			<div class="becky">becky</div>
 		`,
 		onCreate: createSpy,
-		onDestroy: destroySpy
+		onDestroy: destroySpy,
+		onShow: showSpy,
+		onClose: closeSpy
 	});
 	instance.show();
 
 	assert.ok(createSpy.called);
+	assert.ok(showSpy.called);
 
+	instance.close();
 	instance.destroy();
 
 	assert.ok(destroySpy.called);
+	assert.ok(closeSpy.called);
 });
 
 it('should use addition HTML class namespace', function() {
@@ -152,4 +159,17 @@ it('should use addition HTML class namespace', function() {
 	assert.ok(nodesExist(['.sydney-content[role="dialog"] .becky']));
 
 	instance.destroy();
+});
+
+it('should cleanup instance on destroy', function() {
+	const instance = fn({
+		content: /* HTML */ '<div class="becky">becky</div>'
+	});
+	instance.show();
+
+	assert.ok(nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
+
+	instance.destroy();
+
+	assert.ok(!nodesExist(['.z-Dialog-content[role="dialog"] .becky']));
 });
