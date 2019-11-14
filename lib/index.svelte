@@ -33,21 +33,16 @@ let count = 0;
 
 export default {
 	oncreate() {
-		const { isContentNode, content, onCreate, id } = this.get();
+		const { isContentNode, content, onCreate } = this.get();
 		onCreate();
 		if (isContentNode) {
 			this.refs.dialog.appendChild(content);
 		}
-		focusLock.on(this.refs.dialog);
-		dialogStack.push(id);
 	},
 	ondestroy() {
-		const { onDestroy, id } = this.get();
+		const { onDestroy } = this.get();
 		onDestroy();
-		focusLock.off(this.refs.dialog);
-		dialogStack = dialogStack.filter(
-			(dialogStackId) => dialogStackId !== id
-		);
+		this.unlockFocus();
 	},
 	data() {
 		const id = count;
@@ -117,9 +112,26 @@ export default {
 		},
 		show() {
 			this.set({ isHidden: false });
+			this.lockFocus();
 		},
 		close() {
 			this.set({ isHidden: true });
+			this.unlockFocus();
+		},
+		lockFocus() {
+			const { id } = this.get();
+			focusLock.on(this.refs.dialog);
+			dialogStack = dialogStack.filter(
+				(dialogStackId) => dialogStackId !== id
+			);
+			dialogStack.push(id);
+		},
+		unlockFocus() {
+			const { id } = this.get();
+			focusLock.off(this.refs.dialog);
+			dialogStack = dialogStack.filter(
+				(dialogStackId) => dialogStackId !== id
+			);
 		}
 	}
 };

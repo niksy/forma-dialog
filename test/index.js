@@ -56,7 +56,11 @@ it('should close instance when pressing Escape key', function() {
 
 		pressEscape(document.body);
 
-		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(
+			nodesExist([
+				'.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky'
+			])
+		);
 	} finally {
 		instance.destroy();
 	}
@@ -80,7 +84,11 @@ it('should close instance when clicking outside dialog', function() {
 
 		mouseClick(outsideElement);
 
-		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(
+			nodesExist([
+				'.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky'
+			])
+		);
 	} finally {
 		instance.destroy();
 	}
@@ -114,7 +122,11 @@ it('should close instance when clicking on [data-z-dialog-action="close"]', func
 
 		mouseClick(closeButton);
 
-		assert.ok(nodesExist(['.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky']));
+		assert.ok(
+			nodesExist([
+				'.z-Dialog.is-hidden .z-Dialog-content[role="dialog"] .becky'
+			])
+		);
 	} finally {
 		instance.destroy();
 	}
