@@ -25,7 +25,7 @@ npm install z-dialog --save
 import dialog from 'z-dialog';
 
 const instance = dialog({
-	content: `<p>Dialog content</p>`
+	content: `<p>Becky</p>`
 });
 
 instance.show();
