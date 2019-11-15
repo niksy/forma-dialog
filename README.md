@@ -3,7 +3,7 @@
 [![Build Status][ci-img]][ci]
 [![BrowserStack Status][browserstack-img]][browserstack]
 
-Lightweight and accessible dialog component.
+Dialog component.
 
 Features:
 

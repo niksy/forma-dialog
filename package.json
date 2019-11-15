@@ -1,7 +1,7 @@
 {
   "name": "z-dialog",
   "version": "0.0.0",
-  "description": "Lightweight and accessible dialog component.",
+  "description": "Dialog component.",
   "main": "index.cjs.js",
   "module": "index.esm.js",
   "author": "Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com)",
