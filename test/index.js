@@ -173,6 +173,98 @@ it('should use addition HTML class namespace', function() {
 	instance.destroy();
 });
 
+it('should use handle `aria-hidden` for sibling and ancestor elmenents', function() {
+	const instance = fn({
+		content: /* HTML */ `
+			<div class="becky">becky</div>
+		`
+	});
+	instance.show();
+
+	assert.ok(nodesExist(['body *[aria-hidden="true"]:first-child']));
+
+	instance.destroy();
+
+	assert.ok(nodesExist(['body *:not([aria-hidden="true"]):first-child']));
+});
+
+it('should handle multiple instances', function() {
+	const instanceOne = fn({
+		content: /* HTML */ `
+			<div class="becky">becky</div>
+		`
+	});
+	const instanceTwo = fn({
+		content: /* HTML */ `
+			<div class="allie">allie</div>
+		`
+	});
+	const instanceThree = fn({
+		content: /* HTML */ `
+			<div class="lexie">
+				<button
+					type="button"
+					class="shelby"
+					data-statua-dialog-action="close"
+				>
+					lexie
+				</button>
+			</div>
+		`
+	});
+	instanceOne.show();
+	instanceTwo.show();
+	instanceThree.show();
+
+	try {
+		assert.ok(
+			nodesExist([
+				'body *[aria-hidden="true"]:first-child',
+				'.statua-Dialog[aria-hidden="true"] .becky',
+				'.statua-Dialog[aria-hidden="true"] .allie',
+				'.statua-Dialog:not([aria-hidden="true"]) .lexie'
+			])
+		);
+
+		const closeButton = document.querySelector('.shelby');
+
+		mouseClick(closeButton);
+
+		assert.ok(
+			nodesExist([
+				'.statua-Dialog[aria-hidden="true"] .becky',
+				'.statua-Dialog:not([aria-hidden="true"]) .allie',
+				'.statua-Dialog[aria-hidden="true"] .lexie'
+			])
+		);
+
+		pressEscape(document.body);
+
+		assert.ok(
+			nodesExist([
+				'.statua-Dialog:not([aria-hidden="true"]) .becky',
+				'.statua-Dialog[aria-hidden="true"] .allie',
+				'.statua-Dialog[aria-hidden="true"] .lexie'
+			])
+		);
+
+		pressEscape(document.body);
+
+		assert.ok(
+			nodesExist([
+				'body *:not([aria-hidden="true"]):first-child',
+				'.statua-Dialog[aria-hidden="true"] .becky',
+				'.statua-Dialog[aria-hidden="true"] .allie',
+				'.statua-Dialog[aria-hidden="true"] .lexie'
+			])
+		);
+	} finally {
+		instanceOne.destroy();
+		instanceTwo.destroy();
+		instanceThree.destroy();
+	}
+});
+
 it('should cleanup instance on destroy', function() {
 	const instance = fn({
 		content: /* HTML */ '<div class="becky">becky</div>'

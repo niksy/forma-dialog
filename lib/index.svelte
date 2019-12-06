@@ -2,6 +2,42 @@
 import focusLock from 'dom-focus-lock';
 import { KEY_ESCAPE } from 'keycode-js';
 import delegate from 'delegate-event-listener';
+import ancestors from 'ancestors';
+import siblings from 'dom-siblings';
+
+let dialogInstanceStack = [];
+let dialogReferenceStack = [];
+let count = 0;
+
+/**
+ * @param  {HTMLElement}  rootNode
+ * @param  {boolean} isHidden
+ */
+function markRelatedNodesAsHidden(rootNode, isHidden) {
+	[rootNode]
+		.concat(ancestors(rootNode))
+		.filter(
+			(node) =>
+				node !== document.body && node !== document.documentElement
+		)
+		.map((node) => siblings(node))
+		.reduce((array, nodes) => array.concat(nodes), [])
+		.forEach((node) => {
+			markNodeAsHidden(node, isHidden);
+		});
+}
+
+/**
+ * @param  {HTMLElement}  node
+ * @param  {boolean} isHidden
+ */
+function markNodeAsHidden(node, isHidden) {
+	if (isHidden) {
+		node.setAttribute('aria-hidden', 'true');
+	} else {
+		node.removeAttribute('aria-hidden');
+	}
+}
 
 /**
  * @param  {number}  keycode
@@ -28,26 +64,33 @@ function createHtmlClass(namespaces, suffix) {
 		.join(' ');
 }
 
-let dialogStack = [];
-let count = 0;
-
 export default {
 	oncreate() {
-		const { isContentNode, content, onCreate } = this.get();
+		const { id, isContentNode, content, onCreate } = this.get();
+		dialogReferenceStack.push([id, this.refs.container]);
 		onCreate();
 		if (isContentNode) {
 			this.refs.dialog.appendChild(content);
 		}
 	},
 	ondestroy() {
-		const { onDestroy } = this.get();
-		onDestroy();
+		const { id, onDestroy, isComponentActive } = this.get();
+		if (!isComponentActive) {
+			return;
+		}
+		dialogReferenceStack = dialogReferenceStack.filter(
+			([stackId]) => stackId !== id
+		);
 		this.unlockFocus();
+		this.set({ isHidden: true });
+		onDestroy();
+		this.set({ isComponentActive: false });
 	},
 	data() {
 		const id = count;
 		count = count + 1;
 		return {
+			isComponentActive: true,
 			internalHtmlClassNamespace: 'statua-Dialog',
 			isHidden: true,
 			id: id
@@ -90,7 +133,9 @@ export default {
 		handleGlobalMouseEvent(event) {
 			const keycode = event.which;
 			const target = event.target;
+			const { isHidden } = this.get();
 			if (
+				!isHidden &&
 				isMouseClick(keycode) &&
 				target !== this.refs.dialog &&
 				!this.refs.dialog.contains(target) &&
@@ -102,40 +147,91 @@ export default {
 		},
 		handleGlobalKeyboardEvent(event) {
 			const keycode = event.which;
-			if (keycode === KEY_ESCAPE) {
+			if (keycode === KEY_ESCAPE && dialogInstanceStack.length !== 0) {
 				const { id } = this.get();
-				const lastDialogStackId = dialogStack[dialogStack.length - 1];
-				if (lastDialogStackId === id) {
+				const [stackId] = dialogInstanceStack[
+					dialogInstanceStack.length - 1
+				];
+				if (stackId === id) {
 					this.close();
 				}
 			}
 		},
 		show() {
-			const { onShow } = this.get();
+			const { onShow, isComponentActive } = this.get();
+			if (!isComponentActive) {
+				return;
+			}
 			this.set({ isHidden: false });
 			this.lockFocus();
 			onShow();
 		},
 		close() {
-			const { onClose } = this.get();
-			this.set({ isHidden: true });
+			const { onClose, isComponentActive } = this.get();
+			if (!isComponentActive) {
+				return;
+			}
 			this.unlockFocus();
+			this.set({ isHidden: true });
 			onClose();
 		},
 		lockFocus() {
-			const { id } = this.get();
+			const { id, isHidden } = this.get();
+			if (isHidden) {
+				return;
+			}
 			focusLock.on(this.refs.dialog);
-			dialogStack = dialogStack.filter(
-				(dialogStackId) => dialogStackId !== id
+
+			dialogInstanceStack.forEach(([, instance]) => {
+				markRelatedNodesAsHidden(instance.refs.container, false);
+			});
+			dialogInstanceStack = dialogInstanceStack.filter(
+				([stackId]) => stackId !== id
 			);
-			dialogStack.push(id);
+
+			dialogInstanceStack.push([id, this]);
+			markRelatedNodesAsHidden(this.refs.container, true);
 		},
 		unlockFocus() {
-			const { id } = this.get();
+			const { id, isHidden } = this.get();
+			if (isHidden) {
+				return;
+			}
 			focusLock.off(this.refs.dialog);
-			dialogStack = dialogStack.filter(
-				(dialogStackId) => dialogStackId !== id
+
+			const activeElement = document.activeElement;
+
+			dialogInstanceStack = dialogInstanceStack.filter(
+				([stackId]) => stackId !== id
 			);
+			dialogInstanceStack.forEach(([, instance]) => {
+				markRelatedNodesAsHidden(instance.refs.container, false);
+			});
+			markRelatedNodesAsHidden(this.refs.container, false);
+
+			if (
+				activeElement === document.body &&
+				dialogInstanceStack.length !== 0
+			) {
+				const [, instance] = dialogInstanceStack[
+					dialogInstanceStack.length - 1
+				];
+				markRelatedNodesAsHidden(instance.refs.container, true);
+			} else {
+				dialogInstanceStack.forEach(([, instance]) => {
+					if (
+						instance.refs.container.contains(activeElement) ||
+						instance.refs.container === activeElement
+					) {
+						markRelatedNodesAsHidden(instance.refs.container, true);
+					}
+				});
+			}
+			if (dialogInstanceStack.length === 0) {
+				dialogReferenceStack.forEach(([, node]) => {
+					markNodeAsHidden(node, true);
+				});
+			}
 		}
 	}
 };
