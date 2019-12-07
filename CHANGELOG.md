@@ -7,6 +7,10 @@
 -   `aria-hidden` on all sibling and ancestor elements except for the currently
     active dialog which traps the virtual cursor inside the dialog
 
+### Changed
+
+-   Upgrade package
+
 ## [1.0.1][] - 2019-11-19
 
 ### Fixed
