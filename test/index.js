@@ -66,6 +66,26 @@ it('should close instance when pressing Escape key', function() {
 	}
 });
 
+it('should leave instance open if explicitClose is true and Escape key is pressed', function() {
+	const instance = fn({
+		content: /* HTML */ `
+			<div class="becky">becky</div>
+		`,
+		explicitClose: true
+	});
+	instance.show();
+
+	try {
+		assert.ok(nodesExist(['.statua-Dialog-content[role="dialog"] .becky']));
+
+		pressEscape(document.body);
+
+		assert.ok(!nodesExist(['.statua-Dialog.is-hidden']));
+	} finally {
+		instance.destroy();
+	}
+});
+
 it('should close instance when clicking outside dialog', function() {
 	const instance = fn({
 		content: /* HTML */ `
@@ -89,6 +109,31 @@ it('should close instance when clicking outside dialog', function() {
 				'.statua-Dialog.is-hidden .statua-Dialog-content[role="dialog"] .becky'
 			])
 		);
+	} finally {
+		instance.destroy();
+	}
+});
+
+it('should leave instance open when clicking outside dialog if explicitClose is true', function() {
+	const instance = fn({
+		content: /* HTML */ `
+			<div class="becky">becky</div>
+		`,
+		explicitClose: true
+	});
+	instance.show();
+
+	const element = document.querySelector('.statua-Dialog');
+	const outsideElement = document.querySelector('.statua-Dialog-backdrop');
+
+	try {
+		mouseClick(element);
+
+		assert.ok(nodesExist(['.statua-Dialog-content[role="dialog"] .becky']));
+
+		mouseClick(outsideElement);
+
+		assert.ok(!nodesExist(['.statua-Dialog.is-hidden']));
 	} finally {
 		instance.destroy();
 	}

@@ -7,7 +7,8 @@ export default (options = {}) => {
 		onCreate = () => {},
 		onDestroy = () => {},
 		onShow = () => {},
-		onClose = () => {}
+		onClose = () => {},
+		explicitClose = false
 	} = options;
 
 	if (content instanceof TypeError) {
@@ -22,7 +23,8 @@ export default (options = {}) => {
 			onCreate,
 			onDestroy,
 			onShow,
-			onClose
+			onClose,
+			explicitClose
 		}
 	});
 

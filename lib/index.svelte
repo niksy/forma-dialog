@@ -134,8 +134,10 @@ export default {
 			const keycode = event.which;
 			const target = event.target;
 			const { isHidden } = this.get();
+			const { explicitClose } = this.get();
 			if (
 				!isHidden &&
+				!explicitClose &&
 				isMouseClick(keycode) &&
 				target !== this.refs.dialog &&
 				!this.refs.dialog.contains(target) &&
@@ -147,7 +149,12 @@ export default {
 		},
 		handleGlobalKeyboardEvent(event) {
 			const keycode = event.which;
-			if (keycode === KEY_ESCAPE && dialogInstanceStack.length !== 0) {
+			const { explicitClose } = this.get();
+			if (
+				!explicitClose &&
+				keycode === KEY_ESCAPE &&
+				dialogInstanceStack.length !== 0
+			) {
 				const { id } = this.get();
 				const [stackId] = dialogInstanceStack[
 					dialogInstanceStack.length - 1

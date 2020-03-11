@@ -2,6 +2,11 @@
 
 ## [Unreleased][]
 
+### Added
+
+-   `explicitClose` option for disabling modal close when clicking on modal
+    backdrop or when pressing `esc` key
+
 ## [1.1.1][] - 2019-12-19
 
 ### Changed

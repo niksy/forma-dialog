@@ -9,7 +9,8 @@ Features:
 
 -   Best accessibility practices baked in
 -   Tab and focus lock on tabbable elements inside dialog
--   Handles usual UX considerations such as closing on Escape key and clicking on dialog backdrop
+-   Handles usual UX considerations such as closing on Escape key and clicking
+    on dialog backdrop
 -   Flexible styling
 -   Sets `aria-hidden` on all sibling and ancestor elements except for the
     currently active dialog which traps the virtual cursor inside the dialog
@@ -95,6 +96,13 @@ Default: ``
 HTML class namespace in addition to default one (`statua-Dialog`).
 
 Useful if you want to create additional styling/functionality selector hook.
+
+##### explicitClose
+
+Type: `boolean` Default: `false`
+
+Option for disabling modal instance close on `esc` key press, or when modal
+backdrop is clicked.
 
 ### instance.show()
 
