@@ -99,9 +99,10 @@ Useful if you want to create additional styling/functionality selector hook.
 
 ##### explicitClose
 
-Type: `boolean` Default: `false`
+Type: `boolean`  
+Default: `false`
 
-Option for disabling modal instance close on `esc` key press, or when modal
+Option for disabling modal instance close on `Escape` key press, or when modal
 backdrop is clicked.
 
 ### instance.show()
